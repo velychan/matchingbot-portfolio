@@ -70,10 +70,3 @@ return ResponseEntity.ok(searchPostingService.searchJobs(jobRoleName, region, ca
 
 ---
 
-## 📂 프로젝트 구조
-
-matching-bot/
-├── backend/
-├── frontend/
-├── database/
-└── README.md
