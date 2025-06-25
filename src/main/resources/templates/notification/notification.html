@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>알림창</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/notification.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+<div class="container">
+    <h2>알림창</h2>
+
+    <div class="tabs">
+        <button type="button" id="unreadTab" class="tab-button active" onclick="showTab('unread')">읽지 않음</button>
+        <button type="button" id="readTab" class="tab-button" onclick="showTab('read')">읽은 알림</button>
+    </div>
+
+    <!-- 읽지 않은 알림 리스트 -->
+    <div id="unreadList" class="notification-list">
+
+        <div class="delete-all-container" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button id="markAllReadBtn" class="nav-button">모두 읽음</button>
+        </div>
+
+        <div th:each="noti : ${unreadNotifications}"
+             th:onclick="|location.href='/notification/detail/${noti.id}'|"
+             class="notification-item">
+            <span th:text="${noti.content}"></span>
+        </div>
+    </div>
+
+    <!-- 읽은 알림 리스트 -->
+    <div id="readList" class="notification-list" style="display: none;">
+
+        <!-- 오른쪽 정렬된 전체 삭제 버튼 -->
+        <div class="delete-all-container" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button type="button" onclick="deleteAllReadNotifications()" class="nav-button">전체 삭제</button>
+        </div>
+
+        <!-- 읽은 알림 동적 추가 영역 -->
+        <div id="readNotificationList"></div>
+
+        <!-- 로딩 메시지 -->
+        <div id="readLoading" style="display: none; text-align: center; padding: 10px;">로딩 중...</div>
+
+        <!-- 알림이 더 이상 없을 때 메시지 -->
+        <div id="readEndMessage" style="display: none; text-align: center; color: #888; padding: 10px;">
+            더 이상 알림이 없습니다.
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/notification.js}"></script>
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+
+</body>
+</html>

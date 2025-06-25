@@ -1,0 +1,139 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #103254;
+    padding: 1rem 2rem;
+    color: white;
+}
+
+.container {
+    background-color: white;
+    margin: 50px auto;
+    padding-top: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 60px;
+    max-width: 1000px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.calendar-header button {
+    background-color: #103254;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #ccc;
+}
+
+.calendar-cell {
+    background-color: #fff;
+    min-height: 100px;
+    padding: 6px;
+    box-sizing: border-box;
+    position: relative;
+    font-size: 14px;
+}
+
+.calendar-cell.today {
+    border: 5px solid green;
+}
+
+.date-number {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.job-title {
+    background-color: #f0f0f0;
+    font-size: 13px;
+    padding: 3px 5px;
+    margin-top: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day-names {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+/* 마감된 공고 (회색) */
+.job-title.expired {
+    background-color: #d3d3d3;
+    color: #777;
+}
+
+/* 마감 D-4 이하 공고 (헤더색: #103254) */
+.job-title.closing-soon {
+    background-color: #103254;
+    color: white;
+}
+
+/* 그 외 공고 (연한 하늘색) */
+.job-title.default {
+    background-color: #e0f4ff;
+    color: #103254;
+}
+
+.calendar-legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+/* 색상 클래스 재활용 */
+.legend-color.expired {
+    background-color: #d3d3d3;
+}
+
+.legend-color.closing-soon {
+    background-color: #103254;
+}
+
+.legend-color.default {
+    background-color: #e0f4ff;
+    border: 1px solid #103254;
+}

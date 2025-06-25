@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MatchingBot | 이력서 목록</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}"/>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #fafafa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            position: relative;
+            width: 300px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-text {
+            font-size: 0.95rem;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .meta-text {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .stared-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #ddd;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .stared-button.filled {
+            color: #ffd700;
+        }
+
+        .stared-button:hover {
+            color: #ffd700;
+        }
+
+        .pagination {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 4px;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .pagination .active a {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        .pagination .disabled span {
+            color: #aaa;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+    <main class="container">
+
+        <h2>지원자 이력서 목록</h2>
+        <div class="d-flex align-items-center justify-content-center flex-wrap mb-4" style="gap: 10px;">
+            <div th:if="${role == 'COMPANY'}" class="d-flex align-items-center">
+                <label for="jobSelectMain" class="me-2 mb-0"><strong>공고 선택:</strong></label>
+                <select id="jobSelectMain" name="jobId" class="form-select" style="height: 38px; width: auto;">
+                    <!-- ✅ 선택 해제용 기본 옵션 -->
+                    <option value="">🔄 전체 공고 보기</option>
+
+                    <!-- ✅ 실제 공고 리스트 -->
+                    <option th:each="job : ${jobs}"
+                            th:value="${job.id}"
+                            th:text="${job.title}"
+                            th:selected="${selectedJobId == job.id}">
+                        공고 제목
+                    </option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="card-grid">
+            <div class="card" th:each="resume, iterStat : ${resumeList}" th:if="${iterStat.index} < 9"
+                 th:onclick="|location.href='@{/resume/detail/{id}(id=${resume.id})}'|">
+                <button class="stared-button"
+                        th:classappend="${resume.bookmarked} ? 'filled' : ''"
+                        th:data-resume-id="${resume.id}"
+                        onclick="toggleStar(this, event)"
+                        sec:authorize="hasRole('COMPANY')">
+                    <span th:text="${resume.bookmarked} ? '★' : '☆'">☆</span>
+                </button>
+                <h5 class="card-title" th:text="${resume.memberName} ?: '이름 없음'"></h5>
+                <p class="card-text"><strong>이력서 제목:</strong> <span th:text="${resume.title} ?: '제목 없음'"></span></p>
+                <p class="card-text"><strong>기술 소개:</strong> <span th:text="${resume.skillAnswer} ?: '기술 소개 없음'"></span></p>
+                <p class="card-text"><strong>성향 소개:</strong> <span th:text="${resume.traitAnswer} ?: '성향 소개 없음'"></span></p>
+                <p class="card-text"><strong>기술 키워드:</strong> <span th:text="${resume.skillKeywords} ?: '기술 키워드 없음'"></span></p>
+                <p class="card-text"><strong>작성일:</strong> <span th:text="${#temporals.format(resume.createdAt, 'yyyy-MM-dd')} ?: '작성일 없음'"></span></p>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="pagination">
+                <li th:classappend="${currentPage == 1} ? 'disabled'">
+                    <a th:if="${currentPage > 1}" th:href="@{/resumes(page=${currentPage - 1})}">이전</a>
+                    <span th:if="${currentPage == 1}">이전</span>
+                </li>
+                <li th:each="i : ${#numbers.sequence(((currentPage - 1)/10*10+1), T(java.lang.Math).min(((currentPage - 1)/10*10+10), totalPages))}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a th:href="@{/resumes(page=${i})}" th:text="${i}">1</a>
+                </li>
+                <li th:classappend="${currentPage == totalPages} ? 'disabled'">
+                    <a th:if="${currentPage < totalPages}" th:href="@{/resumes(page=${currentPage + 1})}">다음</a>
+                    <span th:if="${currentPage == totalPages}">다음</span>
+                </li>
+            </ul>
+        </nav>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer(role=${role})}"></div>
+</div>
+
+<script>
+    function toggleStar(button, event) {
+        event.stopPropagation();
+        const resumeId = button.dataset.resumeId;
+
+        fetch(`/job/resume-bookmark/toggle?resumeId=${resumeId}`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("즐겨찾기 실패");
+                return response.json();
+            })
+            .then(data => {
+                const icon = button.querySelector('span');
+
+                if (data.bookmarked) {
+                    button.classList.add('filled');
+                    icon.textContent = '★';
+                    alert('이력서가 즐겨찾기 되었습니다.');
+                } else {
+                    button.classList.remove('filled');
+                    icon.textContent = '☆';
+                    alert('즐겨찾기가 해제되었습니다.');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('오류가 발생했습니다.');
+            });
+    }
+</script>
+
+<script>
+    let sortedResumes = [];
+    const itemsPerPage = 9;
+    let currentPage = 1;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const jobSelect = document.getElementById("jobSelectMain");
+
+        const savedJobId = localStorage.getItem("selectedJobId");
+        if (savedJobId) {
+            jobSelect.value = savedJobId;
+
+            fetchAndRenderResumes(savedJobId);
+        }
+
+        if (!jobSelect) return;
+
+        jobSelect.addEventListener("change", async () => {
+            const jobId = jobSelect.value;
+            if (!jobId) {
+                // ✅ 선택 해제 시 동작
+                localStorage.removeItem("selectedJobId");
+                window.location.reload(); // 또는 전체 이력서 다시 불러오기
+                return;
+            }
+
+            localStorage.setItem("selectedJobId", jobId);
+            await fetchAndRenderResumes(jobId);
+        });
+    });
+
+    async function fetchAndRenderResumes(jobId) {
+        try {
+            const response = await fetch(`/api/v1/resume/sort-resumes-by-job`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jobId: jobId })
+            });
+
+            if (response.ok) {
+                sortedResumes = await response.json();
+                renderResumePage(1);
+            } else {
+                alert("매칭률 정렬에 실패했습니다.");
+            }
+        } catch (e) {
+            console.error("정렬 오류:", e);
+        }
+    }
+
+    function renderResumePage(page) {
+        currentPage = page;
+
+        const container = document.querySelector(".card-grid");
+        container.innerHTML = "";
+
+        const start = (page - 1) * itemsPerPage;
+        const end = page * itemsPerPage;
+        const pageItems = sortedResumes.slice(start, end);
+
+        pageItems.forEach(resume => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.setAttribute("onclick", `location.href='/resume/detail/${resume.id}'`);
+
+            card.innerHTML = `
+                <button class="stared-button ${resume.bookmarked ? 'filled' : ''}"
+                        data-resume-id="${resume.id}"
+                        onclick="toggleStar(this, event)">
+                    <span>${resume.bookmarked ? '★' : '☆'}</span>
+                </button>
+                <h5 class="card-title d-flex justify-content-between align-items-center">
+                    <span>${resume.memberName || '이름 없음'}</span>
+                    <span style="font-size: 0.9rem; color: #007bff;">
+                        ${typeof resume.similarityScore === "number" ? (resume.similarityScore * 100).toFixed(1) + '%' : ''}
+                    </span>
+                </h5>
+                <p class="card-text"><strong>이력서 제목:</strong> ${resume.title || '제목 없음'}</p>
+                <p class="card-text"><strong>기술 소개:</strong> ${resume.skillAnswer || '기술 소개 없음'}</p>
+                <p class="card-text"><strong>성향 소개:</strong> ${resume.traitAnswer || '성향 소개 없음'}</p>
+                <p class="card-text"><strong>기술 키워드:</strong> ${resume.skillKeywords || '기술 키워드 없음'}</p>
+                <p class="card-text"><strong>작성일:</strong> ${resume.createdAt || '작성일 없음'}</p>
+            `;
+            container.appendChild(card);
+        });
+
+        renderPagination(page); // 페이지네이션 다시 렌더링
+    }
+
+    function renderPagination(current) {
+        const paginationContainer = document.querySelector(".pagination");
+        if (!paginationContainer) return;
+
+        paginationContainer.innerHTML = "";
+        const totalPages = Math.ceil(sortedResumes.length / itemsPerPage);
+
+        const groupSize = 10;
+        const currentGroup = Math.floor((current - 1) / groupSize);
+        const startPage = currentGroup * groupSize + 1;
+        const endPage = Math.min(startPage + groupSize - 1, totalPages);
+
+        // 이전 버튼
+        if (startPage > 1) {
+            const prevLi = document.createElement("li");
+            prevLi.innerHTML = `<a href="#">이전</a>`;
+            prevLi.addEventListener("click", (e) => {
+                e.preventDefault();
+                renderResumePage(startPage - 1);
+            });
+            paginationContainer.appendChild(prevLi);
+        }
+
+        // 숫자 페이지 버튼
+        for (let i = startPage; i <= endPage; i++) {
+            const li = document.createElement("li");
+            li.className = (i === current) ? "active" : "";
+            li.innerHTML = `<a href="#">${i}</a>`;
+            li.addEventListener("click", (e) => {
+                e.preventDefault();
+                renderResumePage(i);
+            });
+            paginationContainer.appendChild(li);
+        }
+
+        // 다음 버튼
+        if (endPage < totalPages) {
+            const nextLi = document.createElement("li");
+            nextLi.innerHTML = `<a href="#">다음</a>`;
+            nextLi.addEventListener("click", (e) => {
+                e.preventDefault();
+                renderResumePage(endPage + 1);
+            });
+            paginationContainer.appendChild(nextLi);
+        }
+    }
+
+
+</script>
+<script th:src="@{/js/logout.js}"></script>
+</body>
+</html>

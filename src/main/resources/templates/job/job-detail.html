@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>공고 상세보기</title>
+    <link rel="stylesheet" th:href="@{/css/company-job.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+
+        .job-box {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        .job-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #103254;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .section p {
+            margin: 0;
+        }
+
+        .star-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: gold;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s;
+        }
+
+        .star-button:hover {
+            transform: scale(1.1);
+        }
+
+        .star-button.filled {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+<div class="container">
+    <!-- 매칭률 비교용 키워드 (Spring에서 렌더링) -->
+    <!--<div id="similarity-data"
+         th:data-job-skill="${job.skillKeywords}"
+         th:data-resume-skill="${resume.skillKeywords}">
+    </div>-->
+    <div id="similarity-data"
+         th:data-job-skill="${job != null ? job.skillKeywords : '채용공고 기술 키워드 없음'}"
+         th:data-job-trait="${job != null ? job.traitKeywords : '채용공고 성향 키워드 없음'}"
+         data-resume-skill=""
+         data-resume-trait="">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0;">공고 상세보기</h2>
+
+            <div th:if="${role == 'MEMBER'}" style="display: flex; align-items: center; gap: 10px; margin-left: 12px;">
+                <select id="resumeSelect" name="resumeId"
+                        style="height: 36px; font-size: 14px;">
+                    <option value="" disabled selected>매칭률을 적용할 이력서를 선택하세요</option>
+                    <option th:each="resume : ${resumes}"
+                            th:value="${resume.id}"
+                            th:text="${resume.title}">이력서 제목</option>
+                </select>
+
+                <div class="tooltip-wrapper" style="position: relative;">
+                    <button class="help-icon-button" style="font-size: 16px;">?</button>
+                    <div class="tooltip-box">
+                        본인의 이력서를 선택해 현재 공고와 키워드<br>
+                        매칭률을 계산하여 %로 나타냅니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ 유사도 결과 표시 -->
+            <div id="similarity-score" style="font-size: 18px; color: #007bff;">
+                <!-- 초기 텍스트는 비워두고 JS로 갱신 -->
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="job-box">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <div class="job-title" th:text="${job.title}">채용 제목</div>
+            <button class="star-button"
+                    th:if="${role == 'MEMBER'}"
+                    th:data-job-id="${job.id}"
+                    th:text="${isJobBookmarked != null and isJobBookmarked} ? '★' : '☆'"
+                    th:classappend="${isJobBookmarked != null and isJobBookmarked} ? ' filled' : ''"
+                    onclick="toggleJobStar(this)"
+                    style="background: none; border: none; font-size: 24px; color: gold; cursor: pointer; padding: 0;">☆</button>
+        </div>
+
+        <div class="section">
+            <h4>설명</h4>
+            <p th:text="${job.description}">상세 설명</p>
+        </div>
+
+        <div class="section">
+            <h4>근무지</h4>
+            <p th:text="${job.address}">근무지 주소</p>
+        </div>
+
+        <div class="section">
+            <h4>주요 업무</h4>
+            <p th:text="${job.mainTask}">업무 내용</p>
+        </div>
+
+        <div class="section">
+            <h4>필요 기술</h4>
+            <p th:text="${job.requiredSkills}">필수 기술</p>
+        </div>
+
+        <div class="section">
+            <h4>필요 성향</h4>
+            <p th:text="${job.requiredTraits}">성향</p>
+        </div>
+
+        <div class="section">
+            <h4>기술 키워드</h4>
+            <p th:text="${job.skillKeywords}">기술 키워드</p>
+        </div>
+
+        <div class="section">
+            <h4>성향 키워드</h4>
+            <p th:text="${job.traitKeywords}">성향 키워드</p>
+        </div>
+
+        <div class="section">
+            <h4>채용 기간</h4>
+            <p th:text="${job.startDate} + ' ~ ' + ${job.endDate}">시작 ~ 종료일</p>
+        </div>
+
+        <div class="section">
+            <h4>지원 이메일</h4>
+            <p th:text="${job.enrollEmail}">example@domain.com</p>
+        </div>
+
+        <div class="section">
+            <h4>안내 사항</h4>
+            <p th:text="${job.notice}">지원 시 유의 사항</p>
+        </div>
+
+        <div id="tab-report" class="tab-content active">
+            <div class="report-box">
+                <div class="report-image-wrapper">
+                    <a th:href="@{/attached/company/{id}(id=${companyId})}">
+                        <img id="summaryImage"
+                             th:attr="data-company-id=${companyId}"
+                             src="/img/loading.jpg"
+                             alt="기업 평가 요약"
+                             loading="lazy"
+                             class="report-image"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <button type="button" class="nav-button" onclick="history.back()">돌아가기</button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+<script th:src="@{/js/auth/fetchWithAuth.js}"></script>
+<script th:src="@{/js/chatbot/loadSummaryImage.js}"></script>
+
+<script th:src="@{/js/resumeGoBack.js}"></script>
+<script th:inline="javascript">
+    const userRole2 = /*[[${role != null ? role : "null"}]]*/ null;
+    console.log("userRole2:", userRole2);
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (userRole2 !== "MEMBER") return;
+
+        const resumeSelect = document.getElementById("resumeSelect");
+        console.log("resumeSelect", resumeSelect);
+
+        resumeSelect?.addEventListener("change", async () => {
+            const resumeId = resumeSelect.value;
+            console.log("resumeId", resumeId);
+            if (!resumeId) {
+                console.warn("⛔ resumeId가 비어 있음:", resumeId);
+                return;
+            }
+
+            try {
+                const jobSkillRaw = document.getElementById("similarity-data").dataset.jobSkill;
+                const jobTraitRaw = document.getElementById("similarity-data").dataset.jobTrait;
+                const response = await fetch(`/api/v1/resume/${resumeId}/keywords`);
+                const data = await response.json();
+
+                const container = document.getElementById("similarity-data");
+                container.dataset.resumeSkill = data.skillKeywords.join(',');
+                container.dataset.resumeTrait = data.traitKeywords.join(',');
+
+                const job_skill_keys = jobSkillRaw.split(',').map(s => s.trim()).filter(Boolean);
+                const job_trait_keys = jobTraitRaw.split(',').map(s => s.trim()).filter(Boolean);
+                const resume_skill_keys = data.skillKeywords;
+                const resume_trait_keys = data.traitKeywords;
+
+                console.log("job_skill_keys",job_skill_keys);
+                console.log("resume_skill_keys",resume_skill_keys);
+                console.log("job_trait_keys",job_trait_keys);
+                console.log("resume_trait_keys",resume_trait_keys);
+
+                const simResponse = await fetch("http://localhost:8081/calculate-similarity", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        job_skill_keys,
+                        resume_skill_keys,
+                        job_trait_keys,
+                        resume_trait_keys
+                    })
+                });
+
+                if (simResponse.ok) {
+                    const simResult = await simResponse.json();
+                    const percent = Math.round(simResult.similarity * 100);
+                    document.getElementById("similarity-score").textContent = ` | 매칭률: ${percent}%`;
+                } else {
+                    document.getElementById("similarity-score").textContent = " | 매칭률 불러오기 실패";
+                }
+            } catch (e) {
+                console.error("매칭률 계산 오류:", e);
+                document.getElementById("similarity-score").textContent = " | 매칭률 계산 실패";
+            }
+        });
+    });
+
+    // 채용공고 북마크 토글 함수
+    function toggleJobStar(button) {
+        const jobId = button.getAttribute('data-job-id');
+
+        fetch('/job/api/job-bookmark/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `jobId=${jobId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'added') {
+                    button.textContent = '★';
+                    button.classList.add('filled');
+                } else {
+                    button.textContent = '☆';
+                    button.classList.remove('filled');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('북마크 처리 중 오류가 발생했습니다.');
+            });
+    }
+</script>
+
+
+</body>
+</html>

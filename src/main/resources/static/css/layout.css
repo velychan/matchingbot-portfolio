@@ -1,0 +1,213 @@
+html, body {
+    height: 100%;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body {
+    margin: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f9f9f9;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #103254;
+    padding: 1rem 2rem;
+    color: white;
+    height: 65px;
+    box-sizing: border-box;
+}
+
+.logo {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo-link {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* 알림 종 */
+.notification-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* 알림 종 스타일 */
+.notification-bell {
+    font-size: 24px;
+    position: relative; /* 점 기준 위치를 위해 필요 */
+}
+
+/* 정적 알림 점 */
+.notification-dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    border: 2px solid white;
+    display: inline-block; /* JS가 이걸 토글함 */
+}
+
+/* 메뉴 영역 */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav a,
+.nav button {
+    display: flex;
+    color: white;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* 드롭다운 */
+.dropdown-wrapper {
+    position: relative;
+}
+
+.menu-button {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.menu-button.green {
+    background-color: #b2fd83;
+    color: #103254;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: max-content;
+    min-width: 100%;
+    background-color: white;
+    padding: 0rem;
+    border-radius: 5px;
+    z-index: 999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.dropdown li {
+    list-style: none;
+}
+
+.dropdown li a {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    color: #103254;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.dropdown li a:hover {
+    background-color: #f0f0f0;
+    color: #103254;
+}
+
+.dropdown.green {
+    background-color: #b2fd83;
+}
+
+.dropdown.green li a {
+    color: #103254;
+}
+
+.dropdown.green li a:hover {
+    background-color: #b2fd83;
+    text-decoration: underline;
+    color: #103254;
+}
+
+.dropdown-wrapper.active .dropdown {
+    display: block;
+}
+
+.menu-button.error {
+    background-color: #a8a8a8;
+    color: #103254;
+    text-decoration: none;
+}
+
+/* 메인 콘텐츠 여백 */
+.main-content {
+    flex: 1;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+/* Footer */
+.footer {
+    background: #eee;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 3rem;
+}
+
+/* 이력서 별 버튼 */
+.resume-card-header {
+    position: relative;
+    padding-top: 8px;
+    padding-right: 32px;
+}
+
+.stared-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: gold;
+    cursor: pointer;
+}
+
+.stared-button.filled {
+    color: gold;
+}
+
+.toast {
+    position: fixed;
+    top: 30px; /* 약간 아래로 내림 */
+    left: 50%; /* 화면 중앙 기준 */
+    transform: translateX(-50%); /* 가로 가운데 정렬 */
+    padding: 14px 24px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    background: #7a8096;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+

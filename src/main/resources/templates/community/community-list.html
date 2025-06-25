@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>MatchingBot | 커뮤니티</title>
+  <link rel="stylesheet" th:href="@{/css/layout.css}" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background-color: #fafafa;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-select,
+    .btn {
+      font-size: 1rem;
+    }
+
+    .card-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .card {
+      width: calc(33.333% - 20px);
+      height: 300px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: #555;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    .author-text {
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    .pagination {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      gap: 4px;
+    }
+
+    .pagination li a,
+    .pagination li span {
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .pagination .active a {
+      background-color: #103254;
+      color: white;
+      border: none;
+    }
+
+    .pagination .disabled span {
+      color: #aaa;
+      cursor: default;
+    }
+
+    .form-select {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn-outline-primary {
+      padding: 10px 30px;
+      font-size: 16px;
+      background-color: #103254;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 992px) {
+      .card {
+        width: calc(50% - 20px);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+  <main class="container">
+    <h2>커뮤니티 게시글 목록</h2>
+
+    <form method="get" action="/community/list" class="text-center mb-4">
+      <select name="categoryId" class="form-select w-auto d-inline-block me-2">
+        <option value="">전체</option>
+        <option th:each="category : ${categories}"
+                th:value="${category.id}"
+                th:selected="${category.id == param.categoryId}"
+                th:text="${category.name}"></option>
+      </select>
+      <button type="submit" class="btn btn-outline-primary">검색</button>
+    </form>
+
+    <section class="card-grid">
+      <div class="card" th:each="post : ${postList}">
+        <h5 class="card-title">
+          <a th:href="@{'/community/detail/' + ${post.id}}" th:text="${post.title}">제목</a>
+        </h5>
+        <p class="card-text" th:text="${post.content}">내용 미리보기</p>
+        <p class="author-text">
+          <strong>작성자:</strong>
+          <span th:text="${post.nickname != null ? post.nickname : post.companyName}">작성자</span>
+        </p>
+      </div>
+    </section>
+
+    <nav>
+      <ul class="pagination">
+        <li th:classappend="${postPage.first} ? 'disabled'">
+          <a th:if="${currentPage > 1}" th:href="@{/community/list(page=${currentPage - 1})}">이전</a>
+          <span th:if="${currentPage == 1}">이전</span>
+        </li>
+
+        <li th:each="i : ${#numbers.sequence(((currentPage - 1)/10*10+1), T(java.lang.Math).min(((currentPage - 1)/10*10+10), totalPages))}"
+            th:classappend="${currentPage == i} ? 'active'">
+          <a th:href="@{/community/list(page=${i})}" th:text="${i}">1</a>
+        </li>
+
+        <li th:classappend="${postPage.last} ? 'disabled'">
+          <a th:if="${currentPage < totalPages}" th:href="@{/community/list(page=${currentPage + 1})}">다음</a>
+          <span th:if="${currentPage == totalPages}">다음</span>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="text-end mt-4" sec:authorize="isAuthenticated()">
+      <a th:href="@{/community/write}" class="write-box-btn">✍ 글쓰기</a>
+    </div>
+
+    <style>
+      .write-box-btn {
+        display: inline-block;
+        padding: 16px 28px;
+        background-color: #103254;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        text-decoration: none;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+      }
+
+      .write-box-btn:hover {
+        background-color: #0b243f;
+        transform: translateY(-2px);
+      }
+    </style>
+
+  </main>
+
+  <div th:replace="fragments/footer :: footer"></div>
+</div>
+
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+</body>
+</html>

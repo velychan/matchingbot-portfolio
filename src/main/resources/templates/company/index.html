@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>MatchingBot 기업 홈</title>
+    <link rel="stylesheet" th:href="@{/css/company-job.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+</head>
+<body>
+<!--<p th:text="'현재 userType: ' + ${userType}"></p>-->
+<div class="wrapper">
+    <div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+    <div class="container">
+        <h2>기업 홈</h2>
+
+        <div class="user-info-box">
+            <div class="user-box">
+        <span>
+          <span th:text="${company.name}"></span> 님
+            <button class="star-button"
+                    sec:authorize="!hasRole('COMPANY')"
+                    th:data-company-id="${companyId}"
+                    th:text="${isCompanyBookmarked != null and isCompanyBookmarked} ? '★' : '☆'"
+                    th:classappend="${isCompanyBookmarked != null and isCompanyBookmarked} ? ' filled' : ''"
+                    onclick="toggleCompanyStar(this)">☆</button>
+        </span>
+            </div>
+            <div class="mypage-box">
+                <button class="nav-button" sec:authorize="hasRole('COMPANY')" onclick="goToMyPage()">마이페이지</button>
+            </div>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('report')">기업 평가 보고서</button>
+            <button class="tab-button" onclick="showTab('jobs')">채용공고 목록</button>
+        </div>
+
+        <div id="tab-report" class="tab-content active">
+            <div class="report-box">
+                <div class="report-image-wrapper">
+                    <img id="reportImage"
+                         th:attr="data-company-id=${companyId}"
+                         src="/img/loading.jpg"
+                         alt="기업 평가 리포트"
+                         loading="lazy"
+                         class="report-image"/>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-jobs" class="tab-content">
+            <table class="job-table">
+                <thead>
+                <tr>
+                    <th style="width: 5%;">번호</th>
+                    <th>채용 공고 제목</th>
+                    <th style="width: 25%;">채용 기간</th>
+                    <th>상세보기</th>
+                    <th sec:authorize="!hasRole('COMPANY')">즐겨찾기</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="job, iterStat : ${jobPage.content}">
+                    <td th:text="${iterStat.index + 1}">1</td>
+                    <td th:text="${job.title}">제목</td>
+                    <td th:text="${#temporals.format(job.startDate, 'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(job.endDate, 'yyyy-MM-dd')}">
+                        기간
+                    </td>
+                    <td th:onclick="'location.href=\'/job/' + ${job.id} + '\''">상세보기</td>
+                    <td sec:authorize="!hasRole('COMPANY')">
+                        <button class="star-button"
+                                th:data-job-id="${job.id}"
+                                th:text="${bookmarkedJobIds != null and #lists.contains(bookmarkedJobIds, job.id)} ? '★' : '☆'"
+                                th:classappend="${bookmarkedJobIds != null and #lists.contains(bookmarkedJobIds, job.id)} ? ' filled' : ''"
+                                onclick="toggleJobStar(this)">☆</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</div>
+
+<script>
+
+    function toggleCompanyStar(button) {
+        const companyId = button.getAttribute('data-company-id');
+
+        fetch('/attached/api/company-bookmark/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `companyId=${companyId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'added') {
+                    button.textContent = '★';
+                    button.classList.add('filled');
+                } else {
+                    button.textContent = '☆';
+                    button.classList.remove('filled');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('북마크 처리 중 오류가 발생했습니다.');
+            });
+    }
+
+    function toggleJobStar(button) {
+        const jobId = button.getAttribute('data-job-id');
+
+        fetch('/attached/api/job-bookmark/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `jobId=${jobId}`
+        })
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'added') {
+                    button.textContent = '★';
+                    button.classList.add('filled');
+                } else {
+                    button.textContent = '☆';
+                    button.classList.remove('filled');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('북마크 처리 중 오류가 발생했습니다.');
+            });
+    }
+
+    function goToMyPage() {
+        window.location.href = '/company/mypage';
+    }
+</script>
+<script>
+    function showTab(tabName) {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        document.querySelector(`.tab-button[onclick*='${tabName}']`).classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+</script>
+
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+<script th:src="@{/js/auth/fetchWithAuth.js}"></script>
+<script th:src="@{/js/chatbot/loadReportImage.js}"></script>
+
+</body>
+</html>

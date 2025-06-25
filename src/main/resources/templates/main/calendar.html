@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>채용 공고 달력</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+<div class="container">
+    <div class="calendar-header">
+        <button onclick="changeMonth(-1)">‹ 이전</button>
+        <span id="monthYear">2025년</span>
+        <button onclick="changeMonth(1)">다음 ›</button>
+    </div>
+
+    <div class="calendar-legend d-flex gap-3 justify-content-end mb-3">
+        <div class="legend-item">
+            <span class="legend-color expired"></span> 마감된 공고
+        </div>
+        <div class="legend-item">
+            <span class="legend-color closing-soon"></span> 마감 임박 (D-4 이하)
+        </div>
+        <div class="legend-item">
+            <span class="legend-color default"></span> 일반 공고
+        </div>
+    </div>
+
+    <div class="day-names">
+        <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+    </div>
+
+    <div class="calendar-grid" id="dates"></div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+<script th:src="@{/js/calendar.js}"></script>
+
+</body>
+</html>

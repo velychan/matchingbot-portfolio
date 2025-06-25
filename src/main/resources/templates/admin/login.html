@@ -1,0 +1,43 @@
+<!-- templates/admin/login.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>관리자 로그인</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/login.css}"/>
+</head>
+<body>
+<div class="wrapper">
+    <!-- Header -->
+    <div th:replace="fragments/header :: header(role=${role})"></div>
+
+    <main class="main-content">
+        <div class="login-container" method="post">
+            <h2>관리자 로그인</h2>
+            <form id="admin-form" class="login-form">
+                <label for="email">이메일</label>
+                <input type="email" id="email" name="email" required/>
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required/>
+                <button type="submit">로그인</button>
+                <div class="error-msg" id="error-msg" style="color: red; margin-top: 1rem;"></div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
+
+</div>
+<script>
+    document.getElementById("admin-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        handleLogin("email", "password", "error-msg", "ADMIN");
+    });
+</script>
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+<script th:src="@{/js/auth/loginHandler.js}"></script>
+</body>
+</html>

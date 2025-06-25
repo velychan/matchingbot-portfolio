@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>프로필 편집</title>
+    <link rel="stylesheet" th:href="@{/css/member.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        .profile-edit-container {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #103254;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .phone-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phone-group input, .phone-group select {
+            flex: 1;
+        }
+
+        .button-area {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-button {
+            padding: 10px 30px;
+            font-size: 16px;
+            background-color: #103254;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background-color: #103254;
+        }
+
+        .address-btn {
+            margin-top: 5px;
+            padding: 8px 16px;
+            background-color: #103254;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .address-btn:hover {
+            background-color: #103254;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header(role=${role})}"></div>
+
+<div class="profile-edit-container">
+    <h2>프로필 편집</h2>
+
+    <form th:action="@{/member/profile_edit}" th:object="${member}" method="post" id="profileForm">
+        <input type="hidden" id="phone" th:field="*{phone}">
+
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" th:field="*{email}" class="readonly-field" readonly>
+            <small style="color: #666;">이메일은 변경할 수 없습니다.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" th:field="*{name}" required>
+        </div>
+
+        <div class="form-group">
+            <label>전화번호</label>
+            <div class="phone-group">
+                <select name="phone1" id="phone1">
+                    <option value="010">010</option>
+                    <option value="011">011</option>
+                    <option value="016">016</option>
+                    <option value="017">017</option>
+                    <option value="018">018</option>
+                    <option value="019">019</option>
+                </select>
+                <span>-</span>
+                <input type="text" name="phone2" id="phone2" maxlength="4" placeholder="0000" required
+                       pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <span>-</span>
+                <input type="text" name="phone3" id="phone3" maxlength="4" placeholder="0000" required
+                       pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="nickname">닉네임</label>
+            <input type="text" id="nickname" th:field="*{nickname}"
+                   placeholder="2~15자의 한글, 영문, 숫자, '_', '-'만 사용 가능">
+        </div>
+
+        <div class="form-group">
+            <label>* 주소</label>
+            <input type="text" id="addressRegion" th:field="*{address}" name="addressRegion"
+                   class="address-input" placeholder="주소를 입력해주세요" readonly required maxlength="50">
+            <button type="button" class="address-btn" onclick="execDaumPostcode()">주소 찾기</button>
+            <input type="text" id="addressDetail" th:field="*{addressDetail}" name="addressDetail"
+                   class="address-input" placeholder="상세 주소 (예: 아파트 동/호수 등)" maxlength="50">
+        </div>
+
+        <!--        <div class="form-group">-->
+        <!--            <label for="address">주소</label>-->
+        <!--            <input type="text" id="address" th:field="*{address}" required>-->
+        <!--        </div>-->
+
+        <div class="form-group">
+            <label for="birth">생년월일</label>
+            <input type="date" id="birth" name="birth"
+                   th:value="${member.birth != null ? #temporals.format(member.birth, 'yyyy-MM-dd') : ''}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="gender">성별</label>
+            <select id="gender" th:field="*{gender}" required>
+                <option value="">선택하세요</option>
+                <option value="M" th:selected="${member.gender == 'M'}">남성</option>
+                <option value="F" th:selected="${member.gender == 'F'}">여성</option>
+            </select>
+        </div>
+
+        <label>위치기반 서비스 이용약관 동의</label>
+        <select th:field="*{agreeLocation}">
+            <option value="Y" th:selected="${member.agreeLocation == 'Y'}">동의</option>
+            <option value="N" th:selected="${member.agreeLocation == 'N'}">비동의</option>
+        </select>
+
+        <label>마케팅 정보 수신 동의</label>
+        <select th:field="*{agreeMarketing}">
+            <option value="Y" th:selected="${member.agreeMarketing == 'Y'}">동의</option>
+            <option value="N" th:selected="${member.agreeMarketing == 'N'}">비동의</option>
+        </select>
+
+        <div class="button-area">
+            <button type="submit" class="submit-button" sec:authorize="hasRole('MEMBER')">수정하기</button>
+        </div>
+
+        <div class="button-area">
+            <button type="button" class="submit-button" sec:authorize="hasRole('ADMIN')" onclick="history.back()">돌아가기</button>
+        </div>
+
+    </form>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/dropdown.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
+<script th:src="@{/js/register/postcode.js}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // member.phone 값이 존재할 경우 전화번호 필드 초기화
+        const memberPhone = /*[[${member.phone}]]*/ '';
+        if (memberPhone) {
+            const phone = memberPhone.replace(/-/g, '');
+            if (phone.length >= 10) {
+                document.getElementById('phone1').value = phone.substring(0, 3);
+                document.getElementById('phone2').value = phone.substring(3, 7);
+                document.getElementById('phone3').value = phone.substring(7);
+            }
+        }
+
+        const form = document.getElementById('profileForm');
+        form.addEventListener('submit', function (e) {
+            const phone1 = document.getElementById('phone1').value;
+            const phone2 = document.getElementById('phone2').value;
+            const phone3 = document.getElementById('phone3').value;
+
+            if (phone1 && phone2 && phone3) {
+                document.getElementById('phone').value = phone1 + '-' + phone2 + '-' + phone3;
+            }
+
+            const birth = document.getElementById('birth').value;
+            if (birth) {
+                const birthDate = new Date(birth);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                if (birthDate > today) {
+                    e.preventDefault();
+                    alert('생년월일은 현재 날짜 이전이어야 합니다.');
+                    return false;
+                }
+            }
+        });
+    });
+
+    // 주소 검색 버튼 핸들러 함수 (다음 주소 API 사용)
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                document.getElementById('addressRegion').value = data.roadAddress || data.jibunAddress;
+            }
+        }).open();
+    }
+</script>
+
+</body>
+</html>
