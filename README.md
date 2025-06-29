@@ -59,16 +59,8 @@ return ResponseEntity.ok(searchPostingService.searchJobs(jobRoleName, region, ca
 ## Git
 ![Git](images/Git.png)
 
-## Language
-![Language](images/Language.png)
-
-## 🛠 기술 스택
-
-- **Backend**: Java 17, Spring Boot, JPA (Hibernate), MySQL
-- **Frontend**: Thymeleaf, HTML/CSS, JavaScript
-- **API 연동**: Kakao Map API, OpenAI API (LLM 활용)
-- **Infra**: AWS EC2, S3
-- **협업 도구**: GitHub, Notion, Figma, IntelliJ, Git
+## 기술스택
+![기술 스택](images/Language.png)
 
 ---
 
