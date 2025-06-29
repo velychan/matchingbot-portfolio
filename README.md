@@ -1,29 +1,44 @@
-# 🧩 MatchingBot - AI 기반 HR 매칭 플랫폼
+# 🧩 MatchingBot 
+
+## 🧩 MatchingBot은 AI 기반 HR 매칭 플랫폼
+
+![MatchingBot](images/MatchingBot.png)
 
 AI 기반 이력서-채용공고 매칭 서비스를 개발한 팀 프로젝트입니다.  
 본 프로젝트에서 **백엔드 주요 기능 개발 및 API 설계**를 담당했습니다.
 
 ---
 
-## 📌 주요 기능 (내 담당 파트 중심 정리)
+## 📌 주요 기능 (담당 파트)
 
 - **채용공고 검색 필터링 기능 개발**
     - 직군 → 직종 → 직무 선택 구조 구현 (다단계 직무 선택 UI)
     - 지역 필터링 API 설계
     - 동적 JPQL 기반 검색 쿼리 작성 (Spring Data JPA 활용)
 
+
+![Search](images/Search.png)
+![SearchPosting](images/SearchPosting.png)
+
 - **지도 기반 채용공고 표시 기능**
     - Kakao Map API 연동
     - 내 위치 기반 반경 내 채용공고 마커 표시
     - 주소 검색 기반 마커 표시 및 상세 페이지 이동 처리
 
+![Map](images/Map.png)
+
+
 - **커뮤니티 게시판 CRUD 기능**
     - 게시글 작성/수정/삭제, 댓글 작성 기능
     - 회원 유형에 따른 권한 제어 (로그인 여부에 따른 권한 처리)
 
+![Community](images/Community.png)
+
 - **챗봇 메뉴 이동 기능**
     - Spring Security 기반 사용자 권한별 챗봇 응답 처리
     - GPT API 연동 (기본 질의응답 및 페이지 이동 지원)
+
+![ChatBot](images/ChatBot.png)
 
 ---
 
@@ -56,6 +71,10 @@ return ResponseEntity.ok(searchPostingService.searchJobs(jobRoleName, region, ca
 - **협업 도구**: GitHub, Notion, Figma, IntelliJ, Git
 
 ---
+
+## 서비스 아키텍처
+![서비스 아키텍처](images/Service.png)
+
 
 ## 🧑‍💻 주요 학습 및 경험
 
