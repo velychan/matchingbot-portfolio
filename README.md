@@ -42,17 +42,6 @@ AI 기반 이력서-채용공고 매칭 서비스를 개발한 팀 프로젝트�
 
 ---
 
-️- **코드 스니펫 추가**  
-
-java
-@GetMapping("/api/jobs/search")
-public ResponseEntity<List<SearchPostingDto>> searchJobs(
-@RequestParam String jobRoleName,
-@RequestParam String region,
-@RequestParam String careerType) {
-return ResponseEntity.ok(searchPostingService.searchJobs(jobRoleName, region, careerType));
-}
-
 ## ERD
 ![ERD](images/ERD.png)
 
