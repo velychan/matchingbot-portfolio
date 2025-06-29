@@ -59,7 +59,7 @@ return ResponseEntity.ok(searchPostingService.searchJobs(jobRoleName, region, ca
 ## Git
 ![Git](images/Git.png)
 
-## 기술스택
+## 기술 스택
 ![기술 스택](images/Language.png)
 
 ---
